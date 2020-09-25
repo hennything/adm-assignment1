@@ -1,0 +1,8 @@
+import pandas as pd
+from io import StringIO
+
+movies = pd.read_csv('ml-1m/movies.dat', header=None, sep='::')
+
+data = pd.read_csv('ml-m1/ratings.dat', header=None, sep='::')
+
+print(data.head(5))
