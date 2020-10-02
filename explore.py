@@ -10,3 +10,4 @@ users = pd.read_csv('ml-1m/users.dat', header=None, sep='::', engine='python',
 print(ratings.head(3))
 print(movies.head(3))
 print(users.head(3))
+
