@@ -6,7 +6,7 @@ from sklearn.model_selection import KFold
 from sklearn.metrics import mean_squared_error
 
 ratings = pd.read_csv('ml-1m/ratings.dat', header=None, sep='::', engine='python',
-                      names=["User ID", "Movie ID", "Rating", "Timestamp"])
+                        names=["User ID", "Movie ID", "Rating", "Timestamp"])
 
 kf = KFold(n_splits=5, shuffle=True, random_state=42)
 
