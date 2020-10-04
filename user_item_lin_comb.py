@@ -14,6 +14,7 @@ kf = KFold(n_splits=5, shuffle=True, random_state=42)
 
 rmse_s = []
 
+# still need to fill missing/odd values with the global average
 for train_ix, test_ix in kf.split(ratings):
     X_train, X_test = ratings.iloc[train_ix][['Movie ID', 'User ID', 'Rating']], ratings.iloc[test_ix][['Movie ID', 'User ID', 'Rating']]
 
@@ -27,3 +28,16 @@ for train_ix, test_ix in kf.split(ratings):
 
     m, c = np.linalg.lstsq(pred[['Item Average', 'User Average']], pred['Rating'], rcond=None)[0]
 
+    b = np.mean(pred['Rating']) - m*np.mean(pred['Item Average']) - c*np.mean(pred['User Average'])
+
+    print(m, c, b)
+
+    test_pred = pd.merge(item_avgs, X_test, how="right", on=["Movie ID"]).fillna(glb_avg)
+    test_pred = pd.merge(user_avgs, test_pred, how="right", on=["User ID"]).fillna(glb_avg)
+
+    test_pred['Predictoon'] = test_pred['Item Average']*m + test_pred['User Average']*c + b
+
+    rmse = sqrt(mean_squared_error(test_pred['Predictoon'], test_pred['Rating']))
+    rmse_s.append(rmse)
+
+print(np.mean(rmse_s))
