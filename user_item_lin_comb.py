@@ -28,9 +28,9 @@ for train_ix, test_ix in kf.split(ratings):
 
     m, c = np.linalg.lstsq(pred[['Item Average', 'User Average']], pred['Rating'], rcond=None)[0]
 
-    b = np.mean(pred['Rating']) - m*np.mean(pred['Item Average']) - c*np.mean(pred['User Average'])
+    b = np.mean(pred['Rating']) - m * np.mean(pred['Item Average']) - c * np.mean(pred['User Average'])
 
-    print(m, c, b)
+    print(round(m, 4), round(c, 4), round(b, 4))
 
     test_pred = pd.merge(item_avgs, X_test, how="right", on=["Movie ID"]).fillna(glb_avg)
     test_pred = pd.merge(user_avgs, test_pred, how="right", on=["User ID"]).fillna(glb_avg)
@@ -40,4 +40,4 @@ for train_ix, test_ix in kf.split(ratings):
     rmse = sqrt(mean_squared_error(test_pred['Predictoon'], test_pred['Rating']))
     rmse_s.append(rmse)
 
-print(np.mean(rmse_s))
+print(round(np.mean(rmse_s), 3))
