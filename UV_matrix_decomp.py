@@ -10,11 +10,11 @@ movie_IDs = ratings['Movie ID'].unique()
 print('There are in total ' + str(len(movie_IDs)) + ' movies in the database')
 print('There are in total ' + str(len(user_IDs)) + ' users in the database')
 
-df = pd.DataFrame(index=user_IDs, columns=movie_IDs)
+M = pd.DataFrame(index=user_IDs, columns=movie_IDs)
 
 for index, row in ratings.iterrows():
-    current_row = df.iloc[row['User ID'] - 1]
+    current_row = M.iloc[row['User ID'] - 1]
     current_row[row['Movie ID']] = row['Rating']
 
-print(df.head(10))
-
+U = pd.DataFrame(np.random.randint(1, 5, size=(len(user_IDs), 2)))
+V = pd.DataFrame(np.random.randint(1, 5, size=(2, len(movie_IDs))))
