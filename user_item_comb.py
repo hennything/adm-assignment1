@@ -49,36 +49,42 @@ for train_ix, test_ix in kf.split(ratings):
     pred = pd.merge(item_avgs, X_train, how="right", on=["Movie ID"]).fillna(glb_avg)
     pred = pd.merge(user_avgs, pred, how="right", on=["User ID"]).fillna(glb_avg)
 
-    # m, c = np.linalg.lstsq(pred[['Item Average', 'User Average']], pred['Rating'], rcond=None)[0]
+    m, c = np.linalg.lstsq(pred[['Item Average', 'User Average']], pred['Rating'], rcond=None)[0]
 
     # b = np.mean(pred['Rating']) - m * np.mean(pred['Item Average']) - c * np.mean(pred['User Average'])
 
     # this can be faster if we start with the inital coefficients and intercept possibly, just an idea.
     m = pred.shape[0]
     x0 = np.ones(m)
+    # x0 = b
     X = np.array([x0, pred['Item Average'], pred['User Average']]).T
 
     B = np.array([0, 0, 0])
     Y = np.array(pred['Rating'])
 
-    alpha = 0.01
+    alpha = 0.033
 
-    newB, cost_history = gradient_descent(X, Y, B, alpha, 100000)
+    # check for a build gradient descent alg.
+
+    newB, cost_history = gradient_descent(X, Y, B, alpha, 10000)
     print(newB)
     print(cost_history[-1])
 
     # print(cost_function(X, Y, B))
-
 #########
 #########
 
+    test_pred = pd.merge(item_avgs, X_test, how="right", on=["Movie ID"]).fillna(glb_avg)
+    test_pred = pd.merge(user_avgs, test_pred, how="right", on=["User ID"]).fillna(glb_avg)
 
-#     test_pred = pd.merge(item_avgs, X_test, how="right", on=["Movie ID"]).fillna(glb_avg)
-#     test_pred = pd.merge(user_avgs, test_pred, how="right", on=["User ID"]).fillna(glb_avg)
+    test_pred['Predictoon'] = test_pred['Item Average']*newB[1] + test_pred['User Average']*newB[2] + newB[0]
+    # setting ratings greater than 5 to 5 and less than 1 to 1
+    test_pred.loc[test_pred['Predictoon'] < 1] = 1
+    test_pred.loc[test_pred['Predictoon'] > 5] = 5
 
-#     test_pred['Predictoon'] = test_pred['Item Average']*m + test_pred['User Average']*c + b
+    rmse = sqrt(mean_squared_error(test_pred['Predictoon'], test_pred['Rating']))
+    rmse_s.append(rmse)
 
-#     rmse = sqrt(mean_squared_error(test_pred['Predictoon'], test_pred['Rating']))
-#     rmse_s.append(rmse)
+    # print(test_pred.loc[test_pred['Predictoon'] > 5].shape, test_pred.loc[test_pred['Predictoon'] < 1].shape)
 
-# print(round(np.mean(rmse_s), 3))
+print(round(np.mean(rmse_s), 3))

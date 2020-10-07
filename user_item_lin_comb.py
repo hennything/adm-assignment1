@@ -31,7 +31,7 @@ for train_ix, test_ix in kf.split(ratings):
     b = np.mean(pred['Rating']) - m * np.mean(pred['Item Average']) - c * np.mean(pred['User Average'])
 
     # b, m, c, = -2.34631653,  0.87408878,  0.78106055
-
+    
     test_pred = pd.merge(item_avgs, X_test, how="right", on=["Movie ID"]).fillna(glb_avg)
     test_pred = pd.merge(user_avgs, test_pred, how="right", on=["User ID"]).fillna(glb_avg)
 
