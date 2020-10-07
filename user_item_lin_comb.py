@@ -35,9 +35,17 @@ for train_ix, test_ix in kf.split(ratings):
     test_pred = pd.merge(item_avgs, X_test, how="right", on=["Movie ID"]).fillna(glb_avg)
     test_pred = pd.merge(user_avgs, test_pred, how="right", on=["User ID"]).fillna(glb_avg)
 
-    test_pred['Predictoon'] = test_pred['Item Average']*m + test_pred['User Average']*c + b
+    test_pred['Prediction'] = test_pred['Item Average']*m + test_pred['User Average']*c + b
 
-    rmse = sqrt(mean_squared_error(test_pred['Predictoon'], test_pred['Rating']))
+    rmse = sqrt(mean_squared_error(test_pred['Prediction'], test_pred['Rating']))
     rmse_s.append(rmse)
 
+    plt.plot(pred[['Item Average', 'User Average']], pred['Rating'], 'o', label='Original data', markersize=10)
+    plt.plot(pred[['Item Average', 'User Average']], m * pred[['Item Average', 'User Average']] + b, 'r',
+                 label='Fitted line')
+    plt.legend()
+    plt.show()
+
 print(round(np.mean(rmse_s), 3))
+
+
