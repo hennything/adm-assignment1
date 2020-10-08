@@ -14,6 +14,10 @@ print('There are in total ' + str(len(user_IDs)) + ' users in the database')
 
 M = pd.DataFrame(index=user_IDs, columns=movie_IDs)
 
+print(M.isnull().sum().sum())
+
+# print(len(movie_IDs)*len(user_IDs))
+
 for index, row in ratings.iterrows():
     current_row = M.iloc[row['User ID'] - 1]
     current_row[row['Movie ID']] = row['Rating']
