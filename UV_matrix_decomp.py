@@ -24,18 +24,6 @@ V = pd.DataFrame(np.random.randint(1, 1, size=(2, len(movie_IDs))))
 #create matric same shape as M, to hold the predicted values, so it's just UV
 UV = pd.DataFrame(np.random.randint(1, 1, size=(len(user_IDs), len(movie_IDs))))
 
-#find out how close to M the product of U and V is
-def rmse(UV, U, V, M):
-    element_RMSE = 0
-
-    #sum over non-blank entries of M
-    #take the mean of each element by dividing by the number of non-blank elements summed
-    #take the square of the mean
-
-    return element_RMSE
-
-
-
 #walk through all elements of UV to predict their value
 for i in range(0, len(user_IDs)):
     for j in range(0, len(movie_IDs)):
@@ -55,6 +43,16 @@ for i in range(0, len(user_IDs)):
 
 #UV is now entirely filled, and its value can be compared to M
 
+
+#find out how close to M the product of U and V is
+def rmse(UV, U, V, M):
+    element_RMSE = 0
+
+    #sum over non-blank entries of M
+    #take the mean of each element by dividing by the number of non-blank elements summed
+    #take the square of the mean
+
+    return element_RMSE
 
 
 
