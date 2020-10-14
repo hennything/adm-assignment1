@@ -29,14 +29,17 @@ def initialize(train, d):
 # this needs to be looking at a single row of the UV matrix and compare it to a single row in the M matrix 
 def optimize_elem_u(U, V, u, i):
     iss = M[u] - np.dot(U[u][i], V[i])
+    print(np.nansum(iss) / np.nansum(iss)**2)
+    # print(iss)
 
     # np.where(~np.isnan())
     # test
-    print(np.where(M[u] >= 1))
+    # print(np.where(M[u] >= 1))
 
 # def optimize_elem_v(U, V, v, i):
 
 ##### this is currently where we are stuck
+# change name to train?
 def optimize(U, V, train, d):
     # in here we still have to insert some sort of stop condition based on weather or not the difference is making significant steps
     for i in range(d):
@@ -53,7 +56,7 @@ def optimize(U, V, train, d):
 
 #####
 ratings = pd.read_csv('ml-1m/ratings.dat', header=None, sep='::', engine='python', names=["User ID", "Movie ID", "Rating", "Timestamp"])
-M = ratings.pivot(index='User ID', columns='Movie ID', values='Rating').fillna(-1).to_numpy()
+M = ratings.pivot(index='User ID', columns='Movie ID', values='Rating').to_numpy()
 m, n = M.shape
 
 # test training split isnt implemented in preprocess yet, once that is done then we can implement kfold cross validation
