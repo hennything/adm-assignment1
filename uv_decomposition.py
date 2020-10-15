@@ -30,32 +30,23 @@ def initialize(train, d):
 
 def optimise_u(U, V, row_nr, M_row, i):
     print("optimise U:")
-    # print(
-    #     "the row:", row, "\n",
-    #     "\nrow number: ",row_nr, "\n",
-    #     "\nrow from M:",  M_row, "\n",
-    #     
     V_temp = V.copy()
     V_cols = V_temp[:, np.where(~np.isnan(M_row))].reshape(2, -1)
-    # # print(V_cols.shape)
-    iss = np.dot(U[row_nr, :], V_cols) - V_cols[i, :]
-    # # print(iss, "\n")
-    # # print(V_cols[i, :], "\n")
-    # # print((V_cols[i, :] * (M_row[np.where(~np.isnan(M_row))] - iss)).sum(), "\n")
-    # print(iss, V_cols, V_cols[i, :])
-    return (V_cols[i, :] * (M_row[np.where(~np.isnan(M_row))] - iss)).sum() / (V_cols[i, :]**2).sum()
+    internal_sum = np.dot(U[row_nr, :], V_cols) - V_cols[i, :]
+    m_rj = M_row[np.where(~np.isnan(M_row))] #for all j where M has a value
+    V_sj = V_cols[i, :] #for all j where M has a value
+
+    return (V_sj * (m_rj - internal_sum)).sum() / (V_sj**2).sum()
 
 def optimise_v(U, V, col_nr, M_col, i):
     print("optimise V:")
     U_temp = U.copy()
     U_rows = U_temp[np.where(~np.isnan(M_col)), :].reshape(2, -1)
-    # # print(U_rows.shape)
-    iss = np.dot(V[:, col_nr], U_rows) - U_rows[i, :]
-    # # print(iss, "\n")
-    # # print(U_rows[i, :], "\n")
-    # print(iss, U_rows, U_rows[i, :])
-    print((U_rows * (M_col[np.where(~np.isnan(M_col))] - iss)).sum(), "\n")
-    return (U_rows[i, :] * (M_col[np.where(~np.isnan(M_col))] - iss)).sum() / (U_rows[i, :]**2).sum()
+    internal_sum = np.dot(V[:, col_nr], U_rows) - U_rows[i, :]
+    M_is = M_col[np.where(~np.isnan(M_col))] #for all i where M has a value
+    U_ir = U_rows[i, :] #for all i where M has a value
+
+    return (U_ir * (M_is - internal_sum)).sum() / (U_ir**2).sum()
 
 def rmse(U, V, M):
     # print(np.nansum(M))
