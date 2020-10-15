@@ -26,48 +26,90 @@ def initialize(train, d):
 
     return U, V
 
-# this needs to be looking at a single row of the UV matrix and compare it to a single row in the M matrix 
-def optimize_elem_u(U, V, u, i):
-    iss = M[u] - np.dot(U[u][i], V[i])
-    print(np.nansum(iss) / np.nansum(iss)**2)
-    # print(iss)
+def optimise_u(U, V, row_nr, M_row, i):
+    # print(
+    #     "the row:", row, "\n",
+    #     "\nrow number: ",row_nr, "\n",
+    #     "\nrow from M:",  M_row, "\n",
+    #     
+    V_temp = V.copy()
+    V_cols = V_temp[:, np.where(~np.isnan(M_row))].reshape(2, -1)
+    iss = np.dot(U[row_nr, :], V_cols) - V_cols[i, :]
+    return (V_cols[i, :] * (M_row[np.where(~np.isnan(M_row))] - iss)).sum() / (V_cols[i, :]**2).sum()
 
-    # np.where(~np.isnan())
-    # test
-    # print(np.where(M[u] >= 1))
+def optimise_v(U, V, col_nr, M_col, i):
+    U_temp = U.copy()
+    U_rows = U_temp[np.where(~np.isnan(M_col)), :].reshape(2, -1)
+    iss = np.dot(V[:, col_nr], U_rows) - U_rows[i, :]
+    return (U_rows * (M_col[np.where(~np.isnan(M_col))] - iss)).sum() / (U_rows[i, :]**2).sum()
 
-# def optimize_elem_v(U, V, v, i):
+def rmse(U, V, M):
+    # print(np.nansum(M))
+    print(np.where(~np.isnan(M))[0].sum())
+    print(np.dot(U, V)[np.where(~np.isnan(M))].sum())
+    # print(np.where(~np.isnan(M))[0].sum() - np.dot(U, V)[np.where(~np.isnan(M))].sum())
+    print(sqrt(np.where(~np.isnan(M))[0].sum() / np.dot(U, V)[np.where(~np.isnan(M))].sum()))
 
-##### this is currently where we are stuck
-# change name to train?
-def optimize(U, V, train, d):
-    # in here we still have to insert some sort of stop condition based on weather or not the difference is making significant steps
+
+#####
+def fit(U, V, M, d):
+    print(U.shape, V.shape, M.shape)
     for i in range(d):
         for u in range(U.shape[0]):
-            optimize_elem_u(U, V, u, i)
-            # U[u][i] = 
-            # call funciton to update element of U, def optimize_elem_u():
-            # print(i, u)
-        # for v in range(V.shape[1]):   
-            # V[v][i] =     or is it V[i][v]?
-            # call funciton to update element of V, def optimize_elem_v():
-            # print(i, v)
-
+            # print(U[u, i])
+            U[u, i] = optimise_u(U, V, u, M[u], i)
+            # print(U[u, i])
+            # if u == 5:
+                # break
+        for v in range(V.shape[1]):
+            # print(V[i, v])
+            V[i, v] = optimise_v(U, V, v, M[:, v], i)
+            # print(V[i, v])
+            # if v == 5:
+                # break
+    rmse(U, V, M)
+    # print(np.dot(U, V))
 
 #####
 ratings = pd.read_csv('ml-1m/ratings.dat', header=None, sep='::', engine='python', names=["User ID", "Movie ID", "Rating", "Timestamp"])
 M = ratings.pivot(index='User ID', columns='Movie ID', values='Rating').to_numpy()
-m, n = M.shape
+
+print(type(M))
+# M = np.array([[5, 2, 4, 4, 3], [3, 1, 2, 4, 1], [2, np.nan, 3, 1, 4], [2, 5, 4, 3, 5], [4, 4, 5, 4, np.nan]]).astype(float)
 
 # test training split isnt implemented in preprocess yet, once that is done then we can implement kfold cross validation
 train = preprocess(ratings)
 # test = preprocess(ratings, False)
 
 # this is the rank of the two uv matrices, I keep using the term rank but dont actually know if its the right term. 
-d = 5
+d = 2
+# U = np.full((5, 2), 1).astype(float)
+# V = np.full((2, 5) ,1).astype(float)
 
 U, V = initialize(train, d)
+# print(np.dot(U, V ))
 
-optimize(U, V, train, d)
+print(U.shape, V.shape)
+rmse(U, V, M)
+fit(U, V, M, d)
+print("")
+# fit(U, V, M, d)
+# print("")
+# fit(U, V, M, d)
+# print("")
+# fit(U, V, M, d)
+# print("")
+# fit(U, V, M, d)
+# print("")
+# fit(U, V, M, d)
+# print("")
+# fit(U, V, M, d)
+# print("")
+# fit(U, V, M, d)
+# print("")
+# fit(U, V, M, d)
+# print("")
+# fit(U, V, M, d)
+
 
 # P = np.dot(U, V)
