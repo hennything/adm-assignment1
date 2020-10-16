@@ -11,23 +11,23 @@ ratings = pd.read_csv('ml-1m/ratings.dat', header=None, sep='::', engine='python
 def optimize_u(i, train):
     X_ij = X[i, train[train[:,0] == i][:, 1]]
     num = np.sum(np.dot(X_ij, V[train[train[:,0] == i][:, 1], :]))
-    den = np.sum(V[train[train[:,0] == i][:, 1], :] * V[train[train[:,0] == i][:, 1], :])
-    # den = np.sum(np.dot(V[train[train[:,0] == i][:, 1], :].T, V[train[train[:,0] == i][:, 1], :]))
+    # den = np.sum(V[train[train[:,0] == i][:, 1], :] * V[train[train[:,0] == i][:, 1], :]) # why does this work here?
+    den = np.sum(np.dot(V[train[train[:,0] == i][:, 1], :].T, V[train[train[:,0] == i][:, 1], :]))
     
     return num / den
 
 def optimize_v(j, train):
     X_ij = X[train[train[:,1] == j][:, 0], j]
     num = np.sum(np.dot(X_ij, U[train[train[:,1] == j][:, 0], :]))
-    den = np.sum(U[train[train[:,1] == j][:, 0], :] * U[train[train[:,1] == j][:, 0], :])
-    # den = np.sum(np.dot(U[train[train[:,1] == j][:, 0], :].T, U[train[train[:,1] == j][:, 0], :]))
+    # den = np.sum(U[train[train[:,1] == j][:, 0], :] * U[train[train[:,1] == j][:, 0], :]) # why this doesnt work here?
+    den = np.sum(np.dot(U[train[train[:,1] == j][:, 0], :].T, U[train[train[:,1] == j][:, 0], :]))
     
     return num / den
 
-# implement random
+# implement stop condition
 def uv_decomposition(train, rmse):
     itr = 0
-    while itr < 10:
+    while itr < 5:
         current = rmse
         for i in range(U.shape[0]):
             U[i, :] = optimize_u(i, train)
