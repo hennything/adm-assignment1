@@ -29,9 +29,9 @@ def initialize(train, d):
     return U, V
 
 def optimise_u(U, V, row_nr, M_row, i):
-    print("optimise U:")
+    # print("optimise U:")
     V_temp = V.copy()
-    V_cols = V_temp[:, np.where(~np.isnan(M_row))].reshape(2, -1)
+    V_cols = V_temp[:, np.where(~np.isnan(M_row))].reshape(d, -1)
     internal_sum = np.dot(U[row_nr, :], V_cols) - V_cols[i, :]
     m_rj = M_row[np.where(~np.isnan(M_row))] #for all j where M has a value
     V_sj = V_cols[i, :] #for all j where M has a value
@@ -39,9 +39,9 @@ def optimise_u(U, V, row_nr, M_row, i):
     return (V_sj * (m_rj - internal_sum)).sum() / (V_sj**2).sum()
 
 def optimise_v(U, V, col_nr, M_col, i):
-    print("optimise V:")
+    # print("optimise V:")
     U_temp = U.copy()
-    U_rows = U_temp[np.where(~np.isnan(M_col)), :].reshape(2, -1)
+    U_rows = U_temp[np.where(~np.isnan(M_col)), :].reshape(d, -1)
     internal_sum = np.dot(V[:, col_nr], U_rows) - U_rows[i, :]
     M_is = M_col[np.where(~np.isnan(M_col))] #for all i where M has a value
     U_ir = U_rows[i, :] #for all i where M has a value
@@ -49,39 +49,58 @@ def optimise_v(U, V, col_nr, M_col, i):
     return (U_ir * (M_is - internal_sum)).sum() / (U_ir**2).sum()
 
 def rmse(U, V, M):
-    # print(np.nansum(M))
-    print("RMSE: \n")
-    # print(M[np.where(~np.isnan(M))], "\n")
-    # print(np.dot(U, V)[np.where(~np.isnan(M))], "\n")
-    print(M[np.where(~np.isnan(M))], np.dot(U, V)[np.where(~np.isnan(M))], "\n")
-    print(np.dot(U, V)[np.where(~np.isnan(M))])
-    print("\n")
-    print(sqrt(mean_squared_error(M[np.where(~np.isnan(M))], np.dot(U, V)[np.where(~np.isnan(M))])), "RMSE")
-    # print(np.where(~np.isnan(M))[0].sum())
-    # print(np.dot(U, V)[np.where(~np.isnan(M))].sum())
-    # print(np.where(~np.isnan(M))[0].sum() - np.dot(U, V)[np.where(~np.isnan(M))].sum())
-    # print(sqrt(np.where(~np.isnan(M))[0].sum() / np.dot(U, V)[np.where(~np.isnan(M))].sum()))
+    # print("RMSE: \n")
+    # print("\n")
+    # print(sqrt(mean_squared_error(M[np.where(~np.isnan(M))], np.dot(U, V)[np.where(~np.isnan(M))])), "RMSE")
+    return sqrt(mean_squared_error(M[np.where(~np.isnan(M))], np.dot(U, V)[np.where(~np.isnan(M))]))
 
+# def fit(U, V, M, d):
+#     current = rmse(U, V, M)
+#     previous = 0
+#     copy_V = V.copy()
+#     copy_U = U.copy()
+#     diff = 1
+#     print(diff, "diff")
+#     while diff > 0.0001:
+#         copy_U = U.copy()
+#         copy_V = V.copy()
+#         for i in range(d):
+#             for u in range(U.shape[0]):
+#                 U[u, i] = optimise_u(U, V, u, M[u], i)
+#             for v in range(V.shape[1]):
+#                 V[i, v] = optimise_v(U, V, v, M[:, v], i)
+#         print(np.dot(U, V))
+            
+#         previous = current
+#         current = rmse(U, V, M)
+#         diff = previous - current
+#         print(diff, "diff")
+#     return copy_U, copy_V
 
 #####
 def fit(U, V, M, d):
-    print(U.shape, V.shape, M.shape)
-    for i in range(d):
-        for u in range(U.shape[0]):
-            # print(U[u, i])
-            U[u, i] = optimise_u(U, V, u, M[u], i)
-            # print(U[u, i])
-            # if u == 5:
-            break
-        for v in range(V.shape[1]):
-            # print(V[i, v])
-            V[i, v] = optimise_v(U, V, v, M[:, v], i)
-            # print(V[i, v])
-            # if v == 5:
-            break
-        break
-    rmse(U, V, M)
-    # print(np.dot(U, V))
+    current = rmse(U, V, M)
+    previous = 0
+    diff = 1
+    copy_u = 0
+    copy_v = 0
+    while diff > 0.0001:
+        copy_u = U.copy()
+        copy_v = V.copy()
+        for i in range(d):
+            for u in range(U.shape[0]):
+                U[u, i] = optimise_u(U, V, u, M[u], i)
+            for v in range(V.shape[1]):
+                V[i, v] = optimise_v(U, V, v, M[:, v], i)
+    
+        previous = current
+        current = rmse(U, V, M)
+        diff = (previous - current)
+        # print(diff, "dif")
+        print(current)
+        # print(np.dot(U, V))
+    return copy_u, copy_v
+    # print(np.dot(copy_u, copy_v))
 
 #####
 ratings = pd.read_csv('ml-1m/ratings.dat', header=None, sep='::', engine='python', names=["User ID", "Movie ID", "Rating", "Timestamp"])
@@ -104,7 +123,9 @@ V = np.full((2, 5) ,1).astype(float)
 
 # print(U.shape, V.shape)
 rmse(U, V, M)
-fit(U, V, M, d)
+new_u, new_v = fit(U, V, M, d)
+
+print(np.dot(new_u, new_v))
 # print(U, V)
 # print("")
 # print(np.dot(U, V))

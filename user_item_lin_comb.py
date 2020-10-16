@@ -12,11 +12,11 @@ ratings = pd.read_csv('ml-1m/ratings.dat', header=None, sep='::', engine='python
 
 kf = KFold(n_splits=5, shuffle=True, random_state=42)
 
-rmse_s = []
+rmse_scores = []
 
-# still need to fill missing/odd values with the global average
 for train_ix, test_ix in kf.split(ratings):
-    X_train, X_test = ratings.iloc[train_ix][['Movie ID', 'User ID', 'Rating']], ratings.iloc[test_ix][['Movie ID', 'User ID', 'Rating']]
+    X_train, X_test = ratings.iloc[train_ix][['Movie ID', 'User ID', 'Rating']], \
+                        ratings.iloc[test_ix][['Movie ID', 'User ID', 'Rating']]
 
     glb_avg = X_train['Rating'].mean()
 
@@ -30,22 +30,18 @@ for train_ix, test_ix in kf.split(ratings):
 
     b = np.mean(pred['Rating']) - m * np.mean(pred['Item Average']) - c * np.mean(pred['User Average'])
 
-    # b, m, c, = -2.34631653,  0.87408878,  0.78106055
+    # b, m, c, = -2.34631653,  0.87408878,  0.78106055 # optimal values for b, m, c as per gradient descent. 
     
     test_pred = pd.merge(item_avgs, X_test, how="right", on=["Movie ID"]).fillna(glb_avg)
     test_pred = pd.merge(user_avgs, test_pred, how="right", on=["User ID"]).fillna(glb_avg)
 
     test_pred['Prediction'] = test_pred['Item Average']*m + test_pred['User Average']*c + b
+    test_pred[test_pred['Prediction'] > 5] = 5
+    test_pred[test_pred['Prediction'] < 1] = 1
 
     rmse = sqrt(mean_squared_error(test_pred['Prediction'], test_pred['Rating']))
-    rmse_s.append(rmse)
+    rmse_scores.append(rmse)
 
-    plt.plot(pred[['Item Average', 'User Average']], pred['Rating'], 'o', label='Original data', markersize=10)
-    plt.plot(pred[['Item Average', 'User Average']], m * pred[['Item Average', 'User Average']] + b, 'r',
-                 label='Fitted line')
-    plt.legend()
-    plt.show()
-
-print(round(np.mean(rmse_s), 3))
+print("Average RMSE: {}".format(round(np.mean(rmse_scores), 3)))
 
 

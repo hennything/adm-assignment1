@@ -35,7 +35,7 @@ def gradient_descent(X, Y, B, alpha, iterations):
         
     return B, cost_history
 
-rmse_s = []
+rmse_scores = []
 
 # still need to fill missing/odd values with the global average
 for train_ix, test_ix in kf.split(ratings):
@@ -83,8 +83,8 @@ for train_ix, test_ix in kf.split(ratings):
     test_pred.loc[test_pred['Predictoon'] > 5] = 5
 
     rmse = sqrt(mean_squared_error(test_pred['Predictoon'], test_pred['Rating']))
-    rmse_s.append(rmse)
+    rmse_scores.append(rmse)
 
     # print(test_pred.loc[test_pred['Predictoon'] > 5].shape, test_pred.loc[test_pred['Predictoon'] < 1].shape)
 
-print(round(np.mean(rmse_s), 3))
+print(round(np.mean(rmse_scores), 3))
