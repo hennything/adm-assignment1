@@ -10,7 +10,7 @@ ratings = pd.read_csv('ml-1m/ratings.dat', header=None, sep='::', engine='python
 
 kf = KFold(n_splits=5, shuffle=True, random_state=42)
 
-rmse_s = []
+rmse_scores = []
 
 for train_ix, test_ix in kf.split(ratings):
     X_train, X_test = ratings.iloc[train_ix][['User ID', 'Rating']], ratings.iloc[test_ix][['User ID', 'Rating']]
@@ -22,6 +22,6 @@ for train_ix, test_ix in kf.split(ratings):
     pred = pd.merge(item_avgs, X_test, how="right", on=["User ID"]).fillna(glb_avg)
 
     rmse = sqrt(mean_squared_error(pred['Rating_x'], pred['Rating_y']))
-    rmse_s.append(rmse)
+    rmse_scores.append(rmse)
 
-print(np.mean(rmse_s))
+print("Average RMSE: {}".format(round(np.mean(rmse_scores), 3)))
